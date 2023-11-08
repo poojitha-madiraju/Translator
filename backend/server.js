@@ -1,4 +1,5 @@
 const express = require("express");
+const fs = require("fs");
 const dotenv = require("dotenv").config();
 const colors = require("colors");
 const OpenAI = require("openai");
@@ -53,6 +54,21 @@ app.use("/get-translation", async (req, res) => {
   }
 
   res.status(200).json(responseContent);
+});
+
+const speechFile = path.resolve("./speech.mp3");
+
+app.use("/get-translation-speech", async (req, res) => {
+  const translation = req.query.translation;  
+  console.log(translation);
+  const mp3 = await openai.audio.speech.create({
+    model: "tts-1",
+    voice: "alloy",
+    input: translation,
+  });
+  console.log(speechFile);
+  const buffer = Buffer.from(await mp3.arrayBuffer());
+  await fs.promises.writeFile(speechFile, buffer);
 });
 
 // Frontend;
